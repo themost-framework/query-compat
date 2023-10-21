@@ -1,7 +1,10 @@
 // MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2023, THEMOST LP All rights reserved
-import { LiteralExpression, ObjectExpression, Operators, SequenceExpression, 
+import { LiteralExpression, Operators, 
     MemberExpression, ArithmeticExpression, LogicalExpression,
     AggregateComparisonExpression, MethodCallExpression, ComparisonExpression } from '@themost/query';
+
+import { SequenceExpression, ObjectExpression } from '@themost/query-compat';
+
 const isComparisonOperator = ComparisonExpression.isComparisonOperator;
 const isArithmeticOperator = ArithmeticExpression.isArithmeticOperator;
 
