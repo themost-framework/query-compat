@@ -6,8 +6,8 @@
             "@themost/query-compat/closures": [
                 "closures/src/index.js"
             ],
-            "@themost/query-compat/operators": [
-                "operators/src/index.js"
+            "@themost/query-compat/register": [
+                "register/src/index.js"
             ],
             "@themost/query-compat": [
                 "src/index.js"

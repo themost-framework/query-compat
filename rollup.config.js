@@ -8,7 +8,7 @@ const external = Object.keys(pkg.dependencies || {})
     .concat(Object.keys(pkg.peerDependencies || {}))
     .concat([
         '@themost/query-compat/closures',
-        '@themost/query-compat/operators',
+        '@themost/query-compat/register',
         '@themost/query-compat'
     ])
 
@@ -79,11 +79,11 @@ module.exports = [
         ],
         external: external,
         plugins: [dts()],
-    }, // @themost/query-compat/operators
+    }, // @themost/query-compat/register
     {
-        input: 'operators/src/index.js',
+        input: 'register/src/index.js',
         output: {
-            dir: 'operators/dist',
+            dir: 'register/dist',
             format: 'cjs',
             sourcemap: true
         },
@@ -94,9 +94,9 @@ module.exports = [
         ]
     },
     {
-        input: 'operators/src/index.js',
+        input: 'register/src/index.js',
         output: {
-            file: 'operators/dist/index.esm.js',
+            file: 'register/dist/index.esm.js',
             format: 'esm',
             sourcemap: true
         },
@@ -104,10 +104,10 @@ module.exports = [
         plugins: [babel({ babelHelpers: 'bundled' })]
     },
     {
-        input: 'operators/src/index.d.ts',
+        input: 'register/src/index.d.ts',
         output: [
             {
-                file: 'operators/dist/index.d.ts'
+                file: 'register/dist/index.d.ts'
             }
         ],
         external: external,

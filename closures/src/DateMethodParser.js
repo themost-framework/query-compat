@@ -1,6 +1,6 @@
 // MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2023, THEMOST LP All rights reserved
 
-import { SimpleMethodCallExpression } from '@themost/query';
+import { SimpleMethodCallExpression } from '@themost/query-compat';
 import { PrototypeMethodParser } from './PrototypeMethodParser';
 
 /**
