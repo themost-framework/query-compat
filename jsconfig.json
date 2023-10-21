@@ -1,7 +1,11 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "experimentalDecorators": true,
         "paths": {
+            "@themost/query-compat/closures": [
+                "closures/src/index.js"
+            ]
         }
     }
 }

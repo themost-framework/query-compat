@@ -39,5 +39,38 @@ module.exports = [
         ],
         external: external,
         plugins: [dts()],
+    }, // @themost/query-compat/closures
+    {
+        input: 'closures/src/index.js',
+        output: {
+            dir: 'closures/dist',
+            format: 'cjs',
+            sourcemap: true
+        },
+        external: external,
+        plugins: [
+            commonjs(),
+            babel({ babelHelpers: 'bundled' })
+        ]
+    },
+    {
+        input: 'closures/src/index.js',
+        output: {
+            file: 'closures/dist/index.esm.js',
+            format: 'esm',
+            sourcemap: true
+        },
+        external: external,
+        plugins: [babel({ babelHelpers: 'bundled' })]
+    },
+    {
+        input: 'closures/src/index.d.ts',
+        output: [
+            {
+                file: 'closures/dist/index.d.ts'
+            }
+        ],
+        external: external,
+        plugins: [dts()],
     }
 ];
