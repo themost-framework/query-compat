@@ -1,12 +1,18 @@
 // MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2023, THEMOST LP All rights reserved
 import { LiteralExpression, Operators, 
-    MemberExpression, ArithmeticExpression, LogicalExpression,
-    AggregateComparisonExpression, MethodCallExpression, ComparisonExpression } from '@themost/query';
+    ArithmeticExpression, LogicalExpression, ComparisonExpression,
+    MethodCallExpression } from '@themost/query';
+import { SequenceExpression } from './SequenceExpression';
+import { ObjectExpression } from './ObjectExpression';
+import { AggregateComparisonExpression } from './AggregateComparisonExpression';
+import { isArithmeticOperator } from '@themost/query';
+import { SimpleMemberExpression as MemberExpression } from './SimpleMemberExpression';
 
-import { SequenceExpression, ObjectExpression } from '@themost/query-compat';
-
-const isComparisonOperator = ComparisonExpression.isComparisonOperator;
-const isArithmeticOperator = ArithmeticExpression.isArithmeticOperator;
+function isComparisonOperator(op) {
+    if (typeof op === 'string')
+        return (op.match(ComparisonExpression.OperatorRegEx)!==null);
+    return false;
+}
 
 import { parse } from 'esprima';
 import { DateMethodParser } from './DateMethodParser';

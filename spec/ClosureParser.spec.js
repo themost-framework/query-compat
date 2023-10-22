@@ -21,6 +21,73 @@ describe('ClosureParser', () => {
         expect(parser).toBeTruthy();
     });
 
+    it('should use object property to an equal expression', async () => {
+        const People = new QueryEntity('PersonData');
+        let a = new QueryExpression().select( x => {
+            return {
+                id: x.id,
+                lastName: x.familyName,
+                firstName: x.givenName
+            }
+        })
+        .from(People).where( x => {
+            return x.id === 355;
+        });
+        expect(a.$where).toEqual({
+                $eq: [
+                    { $name: 'PersonData.id' },
+                    355
+                ]
+            });
+        let result = await db.executeAsync(a);
+        expect(result).toBeTruthy();
+        expect(result.length).toBe(1);
+        expect(result[0].id).toBe(355);
+        
+    });
+
+    it('should use object destructuring', async () => {
+        const People = new QueryEntity('PersonData');
+        const identifier = 355;
+        let a = new QueryExpression().select(({id, familyName, givenName}) => {
+            id,
+            familyName,
+            givenName
+        })
+        .from(People).where( x => {
+            return x.id === identifier;
+        }, {
+            identifier
+        });
+        expect(a.$where).toEqual({
+                $eq: [
+                    { $name: 'PersonData.id' },
+                    355
+                ]
+            });
+        let result = await db.executeAsync(a);
+        expect(result).toBeTruthy();
+        expect(result.length).toBe(1);
+        expect(result[0].id).toBe(355);
+
+    });
+
+    it('should unpack object properties', async () => {
+        const People = new QueryEntity('PersonData');
+        let a = new QueryExpression().select(({id, familyName: lastName, givenName: firstName}) => {
+            id,
+            lastName,
+            firstName
+        }).from(People).where( x => {
+            return x.id === 355;
+        });
+        let result = await db.executeAsync(a);
+        expect(result).toBeTruthy();
+        expect(result.length).toBe(1);
+    });
+
+
+
     it('should use select', async () => {
         const products = new QueryEntity('ProductData');
         const query = new QueryExpression().select((x) => {
@@ -38,6 +105,29 @@ describe('ClosureParser', () => {
                 'price'
             ]);
         }
+    });
+
+    it('should unpack nested object properties', async () => {
+        const People = new QueryEntity('PersonData');
+        const PostalAddresses = new QueryEntity('PostalAddressData').as('address');
+        let a = new QueryExpression().select(({
+                id,
+                familyName: lastName,
+                givenName: firstName,
+                address: { streetAddress }
+            }) => {
+            id,
+            lastName,
+            firstName,
+            streetAddress
+        }).from(People).where( x => {
+            return x.id === 355;
+        }).leftJoin(PostalAddresses).with((x, y) => {
+            return x.address === y.id;
+        });
+        let result = await db.executeAsync(a);
+        expect(result).toBeTruthy();
+        expect(result.length).toBe(1);
     });
 
     it('should use select with object destructuring', async () => {
