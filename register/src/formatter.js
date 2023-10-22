@@ -163,6 +163,11 @@ function $not(arg) {
 
 const superFormatWhere = SqlFormatter.prototype.formatWhere;
 
+/**
+ * @this QueryExpression
+ * @param {*} where 
+ * @returns 
+ */
 function formatWhere(where) {
     const op = Object.key(where);
     if (/^\$(eq|ne|lte|lt|gte|gt|in|nin|and|or|not)$/g.test(op)) {
@@ -172,10 +177,35 @@ function formatWhere(where) {
     return superFormatWhere.call(this, where);
 }
 
+const superEscape = SqlFormatter.prototype.escape;
+
+/**
+ * @this QueryExpression
+ * @param {*} value 
+ * @param {*} unquoted 
+ */
+function escape(value,unquoted) {
+    if (value != null && typeof value === 'object') {
+        const keys = Object.keys(value);
+        const key0 = keys[0];
+        if (keys.length === 1 && /^\$/.test(key0)) {
+            const escapeFunc = this[key0];
+            if (typeof escapeFunc === 'function') {
+                const args = value[key0];
+                if (Array.isArray(args)) {
+                    return escapeFunc.apply(this, args);
+                }
+            }
+        }
+    }
+    return superEscape.call(this, value, unquoted);
+}
+
 if (superFormatFieldEx != formatFieldEx) {
     Object.assign(SqlFormatter.prototype, {
         formatFieldEx,
         formatWhere,
+        escape,
         $or,
         $and,
         $not,

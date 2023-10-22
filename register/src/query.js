@@ -286,6 +286,6 @@ if (superWhere != where) {
         thenByDescending,
         groupBy
     });
-    // an exception because with is a reserved word
+    // an exception because "with" is a reserved word
     QueryExpression.prototype.with = _with;
 }
