@@ -1,7 +1,6 @@
 // MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2023, THEMOST LP All rights reserved
 
 import { SimpleMethodCallExpression } from './SimpleMethodCallExpression';
-import { MethodCallExpression } from '@themost/query';
 
 class MathMethodParser {
     constructor() {
@@ -25,7 +24,7 @@ class MathMethodParser {
         return new SimpleMethodCallExpression('ceiling', args);
     }
     static round(args) {
-        return new MethodCallExpression('round', args);
+        return new SimpleMethodCallExpression('round', args);
     }
     static min(args) {
         return new SimpleMethodCallExpression('min', args);

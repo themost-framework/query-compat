@@ -7,6 +7,7 @@ import { ObjectExpression } from './ObjectExpression';
 import { AggregateComparisonExpression } from './AggregateComparisonExpression';
 import { isArithmeticOperator } from '@themost/query';
 import { SimpleMemberExpression as MemberExpression } from './SimpleMemberExpression';
+import { SimpleMethodCallExpression } from './SimpleMethodCallExpression';
 
 function isComparisonOperator(op) {
     if (typeof op === 'string')
@@ -488,7 +489,7 @@ class ClosureParser {
      * @param {{type: string,test: any, consequent: any,alternate: any}} objectExpression
      */
     parseCondition(objectExpression) {
-        return new MethodCallExpression('cond', [
+        return new SimpleMethodCallExpression('cond', [
             this.parseCommon(objectExpression.test),
             this.parseCommon(objectExpression.consequent),
             this.parseCommon(objectExpression.alternate)
@@ -848,7 +849,7 @@ class ClosureParser {
                 return createMethodCall(args);
             }
             else {
-                return new MethodCallExpression(name, args);
+                return new SimpleMethodCallExpression(name, args);
             }
         }
     }
