@@ -26,13 +26,27 @@ function formatFieldEx(obj, format) {
     } else {
         const innerObj = obj[prop];
         const key = Object.key(innerObj);
+        const useAlias = (format === '%f');
         if (key === '$name') {
-            const useAlias = (format === '%f');
             if (/\.\*$/.test(innerObj.$name)) {
                 return this.escapeName(innerObj.$name);
             }
             const sql = (this.settings.forceAlias && useAlias) ? this.escapeName(innerObj.$name).concat(' AS ', this.escapeName(prop)) : this.escapeName(innerObj.$name);
             return sql;
+        } else if (key === '$literal') {
+            return (this.settings.forceAlias && useAlias) ? this.escape(innerObj.$literal).concat(' AS ', this.escapeName(prop)) : this.escapeName(innerObj.$literal);   
+        } else if (key === '$getField') {
+            return (this.settings.forceAlias && useAlias) ? this.escape(innerObj.$getField).concat(' AS ', this.escapeName(prop)) : this.escapeName(innerObj.$getField);
+        } else {
+            const formatFunc = this[key];
+            if (typeof formatFunc === 'function') {
+                const args = innerObj[key];
+                /**
+                 * @type {string}
+                 */
+                const expr = Array.isArray(args) ? formatFunc.apply(this, args): formatFunc.call(this, args);
+                return (this.settings.forceAlias && useAlias) ? expr.concat(' AS ', this.escapeName(prop)) : expr;
+            }
         }
     }
     return superFormatFieldEx.call(this, obj, format);
@@ -185,6 +199,9 @@ const superEscape = SqlFormatter.prototype.escape;
  * @param {*} unquoted 
  */
 function escape(value,unquoted) {
+    if (value != null && Object.prototype.hasOwnProperty.call(value, '$literal')) {
+        return this.escape(value.$literal);   
+    }
     if (value != null && typeof value === 'object') {
         const keys = Object.keys(value);
         const key0 = keys[0];
@@ -199,6 +216,22 @@ function escape(value,unquoted) {
         }
     }
     return superEscape.call(this, value, unquoted);
+}
+
+function $avg(arg) {
+    return sprintf('AVG(%s)', typeof arg === 'string' ? this.escapeName(arg) : this.escape(arg));
+}
+function $min(arg) {
+    return sprintf('MIN(%s)', typeof arg === 'string' ? this.escapeName(arg) : this.escape(arg));
+}
+function $max(arg) {
+    return sprintf('MAX(%s)', typeof arg === 'string' ? this.escapeName(arg) : this.escape(arg));
+}
+function $sum(arg) {
+    return sprintf('SUM(%s)', typeof arg === 'string' ? this.escapeName(arg) : this.escape(arg));
+}
+function $count(arg) {
+    return sprintf('COUNT(%s)', typeof arg === 'string' ? this.escapeName(arg) : this.escape(arg));
 }
 
 if (superFormatFieldEx != formatFieldEx) {
@@ -216,7 +249,12 @@ if (superFormatFieldEx != formatFieldEx) {
         $lt,
         $lte,
         $in,
-        $nin
+        $nin,
+        $avg,
+        $min,
+        $max,
+        $count,
+        $sum
     });
 }
 
