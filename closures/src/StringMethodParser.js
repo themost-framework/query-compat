@@ -8,10 +8,12 @@ class StringMethodParser extends PrototypeMethodParser {
         super();
     }
     startsWith(args) {
-        return new SimpleMethodCallExpression('startsWith', args);
+        // use startswith instead of startsWith (for resolving backwards compatibility issues)
+        return new SimpleMethodCallExpression('startswith', args);
     }
     endsWith(args) {
-        return new SimpleMethodCallExpression('endsWith', args);
+        // use endswith instead of endsWith (for resolving backwards compatibility issues)
+        return new SimpleMethodCallExpression('endswith', args);
     }
     toLowerCase(args) {
         return new SimpleMethodCallExpression('toLower', args);

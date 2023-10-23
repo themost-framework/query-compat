@@ -1,4 +1,4 @@
-import { SqlFormatter } from '@themost/query';
+import { SqlFormatter, QueryExpression } from '@themost/query';
 import { sprintf } from 'sprintf-js';
 
 const superFormatFieldEx = SqlFormatter.prototype.formatFieldEx;
@@ -230,8 +230,62 @@ function $max(arg) {
 function $sum(arg) {
     return sprintf('SUM(%s)', typeof arg === 'string' ? this.escapeName(arg) : this.escape(arg));
 }
+
 function $count(arg) {
     return sprintf('COUNT(%s)', typeof arg === 'string' ? this.escapeName(arg) : this.escape(arg));
+}
+
+function $indexOfBytes(p0, p1) {
+    return this.$indexOf(p0, p1);
+}
+
+function $cond(ifExpr, thenExpr, elseExpr) {
+    // validate ifExpr which should an instance of QueryExpression or a comparison expression
+    let ifExpression;
+    if (ifExpr instanceof QueryExpression) {
+        ifExpression = this.formatWhere(ifExpr.$where);
+    } else if (this.isComparison(ifExpr) || this.isLogical(ifExpr)) {
+        ifExpression = this.formatWhere(ifExpr);
+    } else {
+        throw new Error('Condition parameter should be an instance of query or comparison expression');
+    }
+    return sprintf('(CASE %s WHEN 1 THEN %s ELSE %s END)', ifExpression, this.escape(thenExpr), this.escape(elseExpr));
+}
+
+/**
+ * Formats a switch expression
+ * e.g. CASE WHEN weight>100 THEN 'Heavy' WHEN weight<20 THEN 'Light' ELSE 'Normal' END
+ * @param {{branches: Array<{ case: *, then: * }>, default: *}} expr
+ * @returns {string}
+ */
+function $switch(expr) {
+    const branches = expr.branches;
+    const defaultValue = expr.default;
+    if (Array.isArray(branches) === false) {
+        throw new Error('Switch branches must be an array');
+    }
+    if (branches.length === 0) {
+        throw new Error('Switch branches cannot be empty');
+    }
+    let str = '(CASE';
+    str += ' ';
+    str += branches.map((branch) => {
+        let caseExpression;
+        if (branch.case instanceof QueryExpression) {
+            caseExpression = this.formatWhere(branch.case.$where);
+        } else if (this.isComparison(branch.case) || this.isLogical(branch.case)) {
+            caseExpression = this.formatWhere(branch.case);
+        } else {
+            throw new Error('Case expression should be an instance of query or comparison expression');
+        }
+        return sprintf('WHEN %s THEN %s', caseExpression, this.escape(branch.then));
+    }).join(' ');
+    if (typeof defaultValue !== 'undefined') {
+        str += ' ELSE ';
+        str += this.escape(defaultValue);
+    }
+    str += ' END)';
+    return str;
 }
 
 if (superFormatFieldEx != formatFieldEx) {
@@ -254,7 +308,10 @@ if (superFormatFieldEx != formatFieldEx) {
         $min,
         $max,
         $count,
-        $sum
+        $sum,
+        $indexOfBytes,
+        $cond,
+        $switch
     });
 }
 
