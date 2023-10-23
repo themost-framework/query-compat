@@ -13,6 +13,15 @@
         "sourceType": "module"
     },
     "globals": {
+        "describe": false,
+        "it": false,
+        "fdescribe": false,
+        "fit": false,
+        "beforeEach": false,
+        "afterEach": false,
+        "expect": false,
+        "beforeAll": false,
+        "afterAll": false
     },
     "rules": {
         "no-var": "warn",
