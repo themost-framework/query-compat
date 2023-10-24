@@ -15,7 +15,7 @@ class TestApplication extends DataApplication {
             {
                 'name':'Sqlite Data Adapter', 
                 'invariantName': 'sqlite',
-                'type': '@themost/sqlite#SqliteAdapter'
+                'type': '@themost/sqlite'
             }
         ]);
         this.configuration.setSourceAt('adapters', [

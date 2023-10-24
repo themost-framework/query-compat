@@ -48,4 +48,31 @@ declare module "@themost/query" {
     }
 }
 
+declare module "@themost/data" {
+
+    interface DataQueryable {
+        where(attr: string): this;
+        where<T>(expr: (value: T, ...param: any) => any, params?: any): this;
+        select<T>(expr: (value: T, ...param: any) => any, params?: any): this;
+        select<T,J>(expr: (value1: T, value2: J, ...param: any) => any, params?: any): this;
+        select(...attr: any[]): this;
+        orderBy(attr: any): this;
+        orderBy<T>(expr: (value: T) => any): this;
+        orderByDescending(attr: any): this;
+        orderByDescending<T>(expr: (value: T) => any): this;
+        thenBy(attr: any): this;
+        thenBy<T>(expr: (value: T) => any): this;
+        thenByDescending(attr: any): this;
+        thenByDescending<T>(expr: (value: T) => any): this;
+        groupBy(...attr: any[]): this;
+        groupBy<T>(...args: [...expr:[(value: T) => any], params?: any]): this;
+        expand(...attr: any[]): this;
+        expand<T>(...args: [...expr:[(value: T) => any], params?: any]): this;
+    }
+
+    interface DataModel {
+        filterAsync(params: any): Promise<DataQueryable>;
+    }
+}
+
 export { };
