@@ -11,7 +11,8 @@
     "build": "rimraf dist && rollup -c rollup.config.js"
   },
   "peerDependencies": {
-    "@themost/query": "2.5.7",
+    "@themost/query": "2.5.9",
+    "@themost/data": "2.6.40",
     "sprintf-js": "^1.1.2"
   },
   "engines": {

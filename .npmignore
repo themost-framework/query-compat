@@ -5,6 +5,7 @@ node_modules
 spec
 .nycrc.json
 .nyc_output
+jsconfig.json
 
 
 # eslint
@@ -27,3 +28,8 @@ spec
 # babel
 babel.config.js
 rollup.config.js
+
+$ gitpod
+.gitpod.yml
+
+
