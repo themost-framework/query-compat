@@ -1,10 +1,14 @@
 import { QueryExpression } from '@themost/query';
 import { ClosureParser } from '@themost/query-compat/closures';
 import { instanceOf } from './instance-of';
+import { SyncSeriesEventEmitter } from '@themost/events';
 
 class OpenDataQuery extends QueryExpression {
     constructor() {
         super();
+        this.resolvingMember = new SyncSeriesEventEmitter();
+        this.resolvingJoinMember = new SyncSeriesEventEmitter();
+        this.resolvingMethod = new SyncSeriesEventEmitter();
         this.resolvingJoinMember.subscribe((event) => {
             const fullyQualifiedMember = event.fullyQualifiedMember.split('.');
             if (fullyQualifiedMember.length > 2) {
