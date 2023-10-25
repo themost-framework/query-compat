@@ -66,15 +66,21 @@ const superFrom = QueryExpression.prototype.from;
  */
 function from(entity) {
     superFrom.call(this, entity);
+    let collectionName;
     if (this.$ref) {
-        const name = Object.key(this.$ref);
-        Object.defineProperty(this, '$collection', {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: name
-        });
+        collectionName = Object.key(this.$ref);
+    } else if (typeof entity === 'string') {
+        collectionName = entity
     }
+    if (collectionName == null) {
+        throw new Error('Query collection name cannot be determined');
+    }
+    Object.defineProperty(this, '$collection', {
+        configurable: true,
+        enumerable: false,
+        writable: true,
+        value: collectionName
+    });
     if (this._selectClosure != null) {
         // parse select closure
         this.select.apply(this, this._selectClosure);

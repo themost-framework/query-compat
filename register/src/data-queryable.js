@@ -76,7 +76,9 @@ function upgradeQuery(query) {
     if (query.resolvingMember == null) {
         query.resolvingJoinMember = new SyncSeriesEventEmitter();
         query.resolvingMember = new SyncSeriesEventEmitter();
+        query.resolvingMethod = new SyncSeriesEventEmitter();
     }
+    return query;
 }
 
 const superWhere = DataQueryable.prototype.where
@@ -89,8 +91,7 @@ const superWhere = DataQueryable.prototype.where
 function where() {
     const args = Array.from(arguments);
     if (args.length && typeof args[0] === 'function') {
-        const query = this.query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.query);
         const onResolvingJoinMember = resolveJoinMember(this);
         query.resolvingJoinMember.subscribe(onResolvingJoinMember);
         const onResolvingMember = resolveMember(this);
@@ -119,8 +120,7 @@ function select() {
         /**
          * @type {import("@themost/query").QueryExpression}
          */
-        const query = this.query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.query);
         const onResolvingJoinMember = resolveJoinMember(this);
         query.resolvingJoinMember.subscribe(onResolvingJoinMember);
         const onResolvingMember = resolveMember(this);
@@ -149,8 +149,7 @@ function orderBy() {
         /**
          * @type {import("@themost/query").QueryExpression}
          */
-        const query = this.query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.query);
         const onResolvingJoinMember = resolveJoinMember(this);
         query.resolvingJoinMember.subscribe(onResolvingJoinMember);
         const onResolvingMember = resolveMember(this);
@@ -179,8 +178,7 @@ function thenBy() {
         /**
          * @type {import("@themost/query").QueryExpression}
          */
-        const query = this.query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.query);
         const onResolvingJoinMember = resolveJoinMember(this);
         query.resolvingJoinMember.subscribe(onResolvingJoinMember);
         const onResolvingMember = resolveMember(this);
@@ -209,8 +207,7 @@ function orderByDescending() {
         /**
          * @type {import("@themost/query").QueryExpression}
          */
-        const query = this.query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.query);
         const onResolvingJoinMember = resolveJoinMember(this);
         query.resolvingJoinMember.subscribe(onResolvingJoinMember);
         const onResolvingMember = resolveMember(this);
@@ -239,8 +236,7 @@ function thenByDescending() {
         /**
          * @type {import("@themost/query").QueryExpression}
          */
-        const query = this.query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.query);
         const onResolvingJoinMember = resolveJoinMember(this);
         query.resolvingJoinMember.subscribe(onResolvingJoinMember);
         const onResolvingMember = resolveMember(this);
@@ -269,8 +265,7 @@ function groupBy() {
         /**
          * @type {import("@themost/query").QueryExpression}
          */
-        const query = this.query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.query);
         const onResolvingJoinMember = resolveJoinMember(this);
         query.resolvingJoinMember.subscribe(onResolvingJoinMember);
         const onResolvingMember = resolveMember(this);
@@ -321,8 +316,7 @@ function expand() {
         /**
          * @type {import("@themost/query").QueryExpression}
          */
-        const query = this.clone().query;
-        upgradeQuery(query);
+        const query = upgradeQuery(this.clone().query);
         try { 
             query.resolvingMember.subscribe(onResolvingMember);
             query.resolvingJoinMember.subscribe(onResolvingJoinMember);
