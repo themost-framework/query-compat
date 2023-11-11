@@ -1,4 +1,5 @@
-import { QueryEntity, QueryExpression, count } from '@themost/query';
+import { QueryEntity, QueryExpression } from '@themost/query';
+import { count } from '@themost/query-compat';
 import { SqliteAdapter } from '@themost/sqlite';
 
 describe('QueryExpression.groupBy()', () => {

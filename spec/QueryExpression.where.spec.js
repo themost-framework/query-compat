@@ -1,6 +1,6 @@
 import { QueryEntity, QueryExpression } from '@themost/query';
 // eslint-disable-next-line no-unused-vars
-import { round, max, min, count, avg } from '@themost/query-compat/closures';
+import { round, max, min, count, avg } from '@themost/query-compat';
 import { SqliteAdapter } from '@themost/sqlite';
 
 /**
