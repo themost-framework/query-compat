@@ -1,4 +1,4 @@
-import { ArithmeticExpression, MemberExpression } from '@themost/query';
+import { ArithmeticExpression } from '@themost/query';
 /**
  * @this {ArithmeticExpression}
  * @returns {*}
@@ -28,11 +28,5 @@ if (ArithmeticExpression.prototype.exprOf !== exprOf) {
     Object.assign(ArithmeticExpression.prototype, {
         exprOf
     });
-
-    MemberExpression.prototype.exprOf = function() {
-        return {
-            $name: this.name
-        }; 
-    };
 }
 

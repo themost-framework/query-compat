@@ -1,5 +1,6 @@
-import './query';
-import './formatter';
-import './expressions';
-import './data-queryable';
-import './data-model';
+import './QueryExpression';
+import './SqlFormatter';
+import './ArithmeticExpression';
+import './MemberExpression';
+import './DataQueryable';
+import './DataModel';
