@@ -239,6 +239,14 @@ function $indexOfBytes(p0, p1) {
     return this.$indexOf(p0, p1);
 }
 
+function $startsWith(p0, p1) {
+    return this.$startsWith(p0, p1);
+}
+
+function $endsWith(p0, p1) {
+    return this.$endswith(p0, p1);
+}
+
 function $cond(ifExpr, thenExpr, elseExpr) {
     // validate ifExpr which should an instance of QueryExpression or a comparison expression
     let ifExpression;
@@ -310,6 +318,8 @@ if (superFormatFieldEx != formatFieldEx) {
         $count,
         $sum,
         $indexOfBytes,
+        $startsWith,
+        $endsWith,
         $cond,
         $switch
     });
