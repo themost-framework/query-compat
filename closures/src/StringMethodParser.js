@@ -1,4 +1,4 @@
-// MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2023, THEMOST LP All rights reserved
+// MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2022, THEMOST LP All rights reserved
 
 import { SimpleMethodCallExpression } from './SimpleMethodCallExpression';
 import { PrototypeMethodParser } from './PrototypeMethodParser';
@@ -8,12 +8,10 @@ class StringMethodParser extends PrototypeMethodParser {
         super();
     }
     startsWith(args) {
-        // use startswith instead of startsWith (for resolving backwards compatibility issues)
-        return new SimpleMethodCallExpression('startswith', args);
+        return new SimpleMethodCallExpression('startsWith', args);
     }
     endsWith(args) {
-        // use endswith instead of endsWith (for resolving backwards compatibility issues)
-        return new SimpleMethodCallExpression('endswith', args);
+        return new SimpleMethodCallExpression('endsWith', args);
     }
     toLowerCase(args) {
         return new SimpleMethodCallExpression('toLower', args);

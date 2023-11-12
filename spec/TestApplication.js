@@ -1,4 +1,5 @@
 import {resolve} from 'path';
+import { copyFileSync } from 'fs';
 import {
     DataConfigurationStrategy,
     NamedDataContext,
@@ -18,13 +19,14 @@ class TestApplication extends DataApplication {
                 'type': '@themost/sqlite'
             }
         ]);
+        copyFileSync(resolve(__dirname, 'db/local.db'), resolve(__dirname, 'db/test.db'))
         this.configuration.setSourceAt('adapters', [
             { 
                 'name': 'test',
                 'invariantName': 'sqlite',
                 'default':true,
                 'options': {
-                    database: resolve(__dirname, 'db/local.db')
+                    database: resolve(__dirname, 'db/test.db')
                 }
             }
         ]);

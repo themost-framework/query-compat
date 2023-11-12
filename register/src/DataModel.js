@@ -1,10 +1,89 @@
 // eslint-disable-next-line no-unused-vars
-import { DataModel, DataQueryable, DataFilterResolver } from '@themost/data';
+import { DataModel, DataQueryable, DataFilterResolver, DataConfigurationStrategy } from '@themost/data';
 import { OpenDataParser } from '@themost/query-compat';
-import { DataExpandResolver } from './data-expand-resolver';
-import { DataAttributeResolver } from './data-attribute-resolver';
+import { DataExpandResolver } from './DataExpandResolver';
+import { DataAttributeResolver } from './DataAttributeResolver';
+import { DataModelCreateViewListener as DataModelCreateViewListenerCompat } from './DataModelCreateViewListener';
+import { DataModelCreateViewListener } from '@themost/data';
+import pluralize from 'pluralize';
+
+function hasOwnProperty(any, name) {
+    return Object.prototype.hasOwnProperty.call(any, name);
+}
+
 /**
- * @this DataQueryable
+ * @this {DataModel}
+ * @param {*} obj 
+ * @param {*} state 
+ * @returns 
+ */
+function cast(obj, state) {
+    const self = this;
+    if (obj == null) {
+        return {};
+    }
+    if (Array.isArray(obj)) {
+        return obj.map((x) => {
+            return self.cast(x, state);
+        });
+    } else {
+        let currentState = (state == null) ? (obj.$state == null ? 1 : obj.$state) : state;
+        let result = {};
+        let name;
+        let superModel;
+        if (typeof obj.getSuperModel === 'function') {
+            superModel = obj.getSuperModel();
+        }
+        self.attributes.filter(function (x) {
+            return hasOwnProperty(x, 'many') ? !x.many : true;
+        }).filter((x) => {
+            if (x.model !== self.name) { return false; }
+            return (!x.readonly) ||
+                (x.readonly && (typeof x.calculation !== 'undefined') && currentState === 2) ||
+                (x.readonly && (typeof x.value !== 'undefined') && currentState === 1) ||
+                (x.readonly && (typeof x.calculation !== 'undefined') && currentState === 1);
+        }).filter((y) => {
+            /*
+            change: 2016-02-27
+            author:k.barbounakis@gmail.com
+            description:exclude non editable attributes on update operation
+             */
+            return (currentState === 2) ? (hasOwnProperty(y, 'editable') ? y.editable : true) : true;
+        }).filter((x) => {
+            if (x.insertable === false && x.editable === false) {
+                return false;
+            }
+            return true;
+        }).forEach((x) => {
+            name = hasOwnProperty(obj, x.property) ? x.property : x.name;
+            if (hasOwnProperty(obj, name)) {
+                let mapping = self.inferMapping(name);
+                //if mapping is empty and a super model is defined
+                if (mapping == null) {
+                    if (superModel && x.type === 'Object') {
+                        //try to find if superModel has a mapping for this attribute
+                        mapping = superModel.inferMapping(name);
+                    }
+                }
+                if (mapping == null) {
+                    result[x.name] = obj[name];
+                }
+                else if (mapping.associationType === 'association') {
+                    if (typeof obj[name] === 'object' && obj[name] !== null)
+                        //set associated key value (e.g. primary key value)
+                        result[x.name] = obj[name][mapping.parentField];
+                    else
+                        //set raw value
+                        result[x.name] = obj[name];
+                }
+            }
+        });
+        return result;
+    }
+}
+
+/**
+ * @this {DataModel}
  */
 function filter(params, callback) {
     const self = this;
@@ -274,7 +353,7 @@ function filter(params, callback) {
 }
 
 /**
- * @this DataModel
+ * @this {DataModel}
  * @param {*} params 
  * @returns {Promise<DataQueryable>}
  */
@@ -289,7 +368,173 @@ function filterAsync(params) {
     });
 }
 
-Object.assign(DataModel.prototype, {
-    filter,
-    filterAsync
-});
+/**
+ * @this {DataModel}
+ */
+function initialize() {
+
+    let attributes;
+    const self =this;
+    function get() {
+        //validate self field collection
+        if (typeof attributes !== 'undefined' && attributes !== null)
+            return attributes;
+        //init attributes collection
+        attributes = [];
+        //get base model (if any)
+        const baseModel = self.base();
+        let field;
+        let implementedModel;
+        if (self.implements) {
+            implementedModel = self.context.model(self.implements)
+        }
+        //enumerate fields
+        const strategy = self.context.getConfiguration().getStrategy(DataConfigurationStrategy);
+        self.fields.forEach(function(x) {
+            if (typeof x.many === 'undefined') {
+                if (typeof strategy.dataTypes[x.type] === 'undefined')
+                    //set one-to-many attribute (based on a naming convention)
+                    x.many = pluralize.isPlural(x.name) || (x.mapping && x.mapping.associationType === 'junction');
+                else
+                    //otherwise set one-to-many attribute to false
+                    x.many = false;
+            }
+            // define virtual attribute
+            if (x.many) {
+                // set multiplicity property EdmMultiplicity.Many
+                if (Object.prototype.hasOwnProperty.call(x, 'multiplicity') === false) {
+                    x.multiplicity = 'Many';
+                }
+            }
+            if (x.nested) {
+                // try to find if current field defines one-to-one association
+                const mapping = x.mapping;
+                if (mapping &&
+                    mapping.associationType === 'association' &&
+                    mapping.parentModel === self.name) {
+                    /**
+                     * get child model
+                     * @type {DataModel}
+                     */
+                    const childModel = (mapping.childModel === self.name) ? self : self.context.model(mapping.childModel);
+                    // check child model constraints for one-to-one parent to child association
+                    if (childModel &&
+                        childModel.constraints &&
+                        childModel.constraints.length &&
+                        childModel.constraints.find(function (constraint) {
+                            return constraint.type === 'unique' &&
+                                constraint.fields &&
+                                constraint.fields.length === 1 &&
+                                constraint.fields.indexOf(mapping.childField) === 0;
+                        })) {
+                        // backward compatibility  issue
+                        // set [many] attribute to true because is being used by query processing
+                        x.many = true;
+                        // set multiplicity property EdmMultiplicity.ZeroOrOne or EdmMultiplicity.One
+                        if (typeof x.nullable === 'boolean') {
+                            x.multiplicity = x.nullable ? 'ZeroOrOne' : 'One';
+                        }
+                        else {
+                            x.multiplicity = 'ZeroOrOne';
+                        }
+
+                    }
+                }
+            }
+
+            //re-define field model attribute
+            if (typeof x.model === 'undefined')
+                x.model = self.name;
+            let clone = x;
+            // if base model exists and current field is not primary key field
+            const isPrimary = !!x.primary;
+            if (baseModel != null && isPrimary === false) {
+                // get base field
+                field = baseModel.field(x.name);
+                if (field) {
+                    //clone field
+                    clone = { };
+                    //get all inherited properties
+                    Object.assign(clone, field);
+                    //get all overridden properties
+                    Object.assign(clone, x);
+                    //set field model
+                    clone.model = field.model;
+                    //set cloned attribute
+                    clone.cloned = true;
+                }
+            }
+            if (clone.insertable === false && clone.editable === false && clone.model === self.name) {
+                clone.readonly = true;
+            }
+            //finally push field
+            attributes.push(clone);
+        });
+        if (baseModel) {
+            baseModel.attributes.forEach(function(x) {
+                if (!x.primary) {
+                    //check if member is overridden by the current model
+                    field = self.fields.find(function(y) { return y.name === x.name; });
+                    if (typeof field === 'undefined')
+                        attributes.push(x);
+                }
+                else {
+                    //try to find primary key in fields collection
+                    let primaryKey = self.fields.find((y) => {
+                        return y.name === x.name;
+                    });
+                    if (primaryKey == null) {
+                        //add primary key field
+                        primaryKey = Object.assign({}, x, {
+                            'type': x.type === 'Counter' ? 'Integer' : x.type,
+                            'model': self.name,
+                            'indexed': true,
+                            'value': null,
+                            'calculation': null
+                        });
+                        delete primaryKey.value;
+                        delete primaryKey.calculation;
+                        attributes.push(primaryKey);
+                    }
+                }
+            });
+        }
+        if (implementedModel) {
+            implementedModel.attributes.forEach(function(x) {
+                field = self.fields.find((y) => {
+                    return y.name === x.name;
+                });
+                if (field == null) {
+                    attributes.push(Object.assign({}, x, {
+                        model:self.name
+                    }));
+                }
+            });
+        }
+        return attributes;
+    }
+
+    const configurable = true;
+    const enumerable = false;
+    Object.defineProperty(self, 'attributes', {
+        get,
+        configurable,
+        enumerable
+    });
+
+}
+
+
+
+if (DataModel.prototype.cast != cast) {
+    Object.assign(DataModel.prototype, {
+        initialize,
+        cast,
+        filter,
+        filterAsync
+    });
+}
+
+if (DataModelCreateViewListener.prototype.afterUpgrade != DataModelCreateViewListenerCompat.prototype.afterUpgrade) {
+    DataModelCreateViewListener.prototype.afterUpgrade = DataModelCreateViewListenerCompat.prototype.afterUpgrade;
+}

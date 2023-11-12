@@ -1,7 +1,7 @@
-// MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2023, THEMOST LP All rights reserved
+// MOST Web Framework Codename Zero Gravity Copyright (c) 2017-2022, THEMOST LP All rights reserved
 
 // noinspection ES6PreferShortImport
-import {MethodCallExpression} from '@themost/query';
+import {MethodCallExpression} from '../expressions';
 
 export declare class StringMethodParser {
     startsWith(args: any[]): MethodCallExpression;

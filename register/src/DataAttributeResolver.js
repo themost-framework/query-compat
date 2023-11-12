@@ -622,7 +622,7 @@ class DataAttributeResolver {
      */
     resolveZeroOrOneNestedAttribute(attr) {
         /**
-         * @type {import('./data-queryable').DataQueryable}
+         * @type {import('./DataQueryable').DataQueryable}
          */
         let self = this;
         let fullyQualifiedMember = attr.split('/');
