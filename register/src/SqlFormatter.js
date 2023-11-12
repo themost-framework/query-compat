@@ -240,7 +240,7 @@ function $indexOfBytes(p0, p1) {
 }
 
 function $startsWith(p0, p1) {
-    return this.$startsWith(p0, p1);
+    return this.$startswith(p0, p1);
 }
 
 function $endsWith(p0, p1) {
