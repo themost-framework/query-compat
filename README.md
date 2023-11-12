@@ -1,6 +1,6 @@
 # @themost/query-compat
 
-Backwards compatibility polyfills for [@themost/query](https://github.com/themost-framework/query)
+Backwards compatibility polyfills for [@themost/query](https://github.com/themost-framework/query) and [@themost/data](https://github.com/themost-framework/data)
 
 ## Usage
 
