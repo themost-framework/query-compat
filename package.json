@@ -1,6 +1,6 @@
 {
   "name": "@themost/query-compat",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "Backwards compatibility polyfills for @themost/query",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
